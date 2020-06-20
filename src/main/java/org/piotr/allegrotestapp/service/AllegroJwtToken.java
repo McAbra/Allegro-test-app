@@ -1,22 +1,31 @@
 package org.piotr.allegrotestapp.service;
 
+import lombok.Getter;
 import org.piotr.allegrotestapp.model.Token;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.Base64;
 
 @Service
 public class AllegroJwtToken {
+
     @Autowired
     private RestTemplate restTemplate;
-    private String clientId = "97d2f6f663d84d968f126c15ea3ef3d0";
-    private String clientSecret = "TRhxeJYV6iCKSQgeIu7XaCOPmMov1IbFiREgyEJEwCKlKotUGvYq6DVMXFfDWHXP";
+    @Value("${clientId}")
+    @Getter
+    private String clientId = "";
+    @Value("${clientSecret}")
+    @Getter
+    private String clientSecret = "";
+    //@Value("${authCode=code}")
     private String authCode = "";
     private Token allegroJwtToken = null;
 
@@ -35,6 +44,18 @@ public class AllegroJwtToken {
 
     public void setAllegroJwtToken(Token allegroJwtToken) {
         this.allegroJwtToken = allegroJwtToken;
+    }
+
+    public void getAuthCode(String clientId) {
+        WebClient
+                .builder()
+                .baseUrl("https://allegro.pl.allegrosandbox.pl/auth/oauth/authorize?response_type=code&client_id=" + clientId)
+                .build()
+                .get()
+                .retrieve()
+                .bodyToMono(String.class)
+                .block();
+
     }
 
 
